@@ -1,6 +1,6 @@
 # Idea Garden
 
-Plant a thought, explore its branches, and discover your next project. Idea Garden is a local-first AI brainstorming workspace that turns ideas into an interactive graph. Write your own starting idea or generate one with AI, grow new directions, combine ideas, and let a configurable AI jury help you decide which ones to pursue.
+Plant a thought, explore its branches, and discover your next project. Idea Garden is a local-first AI brainstorming workspace that turns ideas into an interactive graph. Write your own starting idea or generate one with AI, grow new directions, combine ideas, and let a configurable AI jury help you decide which ones to pursue.  Or give the AI a budget, and let it rip, branching and evaluating on its own, until it finds gold (work in progress)
 
 ![Idea Garden showing connected ideas, score-colored cards, and the jury evaluation sidebar](docs/images/idea-garden.png)
 
@@ -69,30 +69,4 @@ The app binds to loopback and has no user authentication. Keep it local. Hosted 
 
 This first version implements the core board workflow. Background evolution, live trend/research scouts, cross-board announcements, calibrated jury reference runs, and automatic creation of project folders are not implemented. Project briefs download as Markdown. Boards are saved in this browser rather than a server database; export backups to move them to another browser or machine.
 
-## Validation
 
-```sh
-npm run check
-npm test
-npm run build
-```
-
-Provider tests use mocked responses; they do not spend API credits.
-
-With the app running and Chrome installed, `node scripts/browser-check.mjs` verifies graph actions, themes, persistence, backup/import, key exclusion, and mobile overflow. Browser AI responses are simulated. Screenshots are saved in `screenshots/`.
-
-`node scripts/model-picker-check.mjs` checks model discovery, searchable dropdowns, keyboard controls, custom IDs, per-role selections, refresh errors, and key exclusion using simulated catalogues. Set `APP_URL` to test a different local port.
-
-`node scripts/vault-check.mjs` checks encryption, wrong passwords, lock/unlock, reload, saving changed keys, decrypted use by providers, export exclusion and plaintext migration using fake credentials in an isolated browser context.
-
-`node scripts/settings-check.mjs` verifies Settings tabs, the nested theme picker, connection state across tabs, the saved Idea View preference, and all idea actions in Modal mode. It also checks switching back to Sidebar, hidden sidebar controls in Modal mode, and mobile layout.
-
-`node scripts/workspace-check.mjs` verifies a fresh empty startup, workspace creation, inline renaming, deletion warnings and cancellation, deleting active/inactive/last workspaces, persistence after reload, and mobile layout.
-
-`node scripts/card-actions-check.mjs` verifies card shortcut placement, hover/focus tooltips, busy states, target-specific scoring and branching, error recovery, and behavior in Modal mode using simulated AI replies.
-
-`node scripts/jury-model-check.mjs` verifies the Models tab, the jury cog in both idea views, persisted jury overrides, the actual provider/model sent for scoring versus branching, resetting to the default, and keyboard navigation across all three tabs.
-
-`node scripts/evaluation-colors-check.mjs` checks score-based rings, the enabled default, unscored cards, live score updates, selection styling, and the saved toggle. `node scripts/card-expansion-check.mjs` checks collapsed startup, full multiline expansion, selection changes, both idea views, and quick actions staying collapsed.
-
-`node scripts/card-font-check.mjs` checks font choices, previews, card typography, persistence, and mobile layout. `node scripts/auto-evaluate-check.mjs` checks the saved toggle, automatic scoring of seeds/branches/combinations, the Jury model override, progress indicators, and recovery from evaluation failures.
