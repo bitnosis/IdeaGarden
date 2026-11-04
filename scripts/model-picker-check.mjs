@@ -1,0 +1,68 @@
+import { seedExample } from './test-fixtures.mjs';
+import { chromium, expect } from '@playwright/test';
+import assert from 'node:assert/strict';
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const page = await browser.newPage({ viewport: { width: 1200, height: 1000 } });
+await seedExample(page);
+const errors = [], requests = []; page.on('pageerror', error => errors.push(error.message));
+let fail = false;
+await page.route('**/api/models', route => {
+ const body = route.request().postDataJSON(); requests.push(body);
+ if (fail && body.provider === 'openrouter') return route.fulfill({ status: 400, json: { error: 'The provider rejected this API key.' } });
+ const models = body.provider === 'openrouter' ? [{ id: 'test/alpha', name: 'Alpha Chat' }, { id: 'test/beta', name: 'Beta Chat' }] : body.provider === 'ollama' ? [{ id: 'local:latest', name: 'Local Chat' }] : [{ id: `${body.provider}-test`, name: `${body.provider} chat` }];
+ return route.fulfill({ json: { models } });
+});
+async function choose(role, query, option) {
+ await page.getByRole('button', { name: role, exact: true }).click();
+ await page.getByRole('combobox', { name: `Search ${role}`, exact: true }).fill(query);
+ await page.getByRole('option', { name: option }).click();
+}
+try {
+ await page.goto(process.env.APP_URL || 'http://127.0.0.1:4340'); await page.locator('.idea-node').first().waitFor();
+ await page.getByRole('button', { name: 'Settings', exact: true }).click();
+ await page.getByRole('tab', { name: 'Models', exact: true }).click();
+ const panel = page.getByRole('tabpanel', { name: 'Models', exact: true });
+ assert.equal(await panel.locator('.model-trigger').count(), 5);
+ assert.equal(await panel.locator('.provider-grid').count(), 0);
+ assert.equal(await panel.getByLabel('Default provider').count(), 0);
+ const firstRole = await panel.locator('.role-model-grid > .role-model-row').nth(0).boundingBox();
+ const secondRole = await panel.locator('.role-model-grid > .role-model-row').nth(1).boundingBox();
+ const juryRole = await panel.locator('.jury-model-row').boundingBox();
+ assert(juryRole.width > firstRole.width * 1.9 && juryRole.y < firstRole.y);
+ assert.equal(await panel.locator('.role-model-grid > .role-model-row').count(), 4);
+ assert(Math.abs(firstRole.width - secondRole.width) < 1);
+ assert(Math.abs(firstRole.y - secondRole.y) < 1);
+ await choose('seed model', 'beta', /openrouter.*Beta Chat/);
+ assert.equal(requests.filter(r => r.provider === 'anthropic' || r.provider === 'openai').length, 0);
+ await page.getByRole('tab', { name: 'Connections', exact: true }).click();
+ await page.getByPlaceholder('Enter API key').nth(1).fill('fake-anthropic-key');
+ await page.getByPlaceholder('Enter API key').nth(2).fill('fake-openai-key');
+ await page.getByRole('tab', { name: 'Models', exact: true }).click();
+ await choose('branch model', 'anthropic-test', /anthropic.*anthropic chat/);
+ await choose('cross model', 'openai-test', /openai.*openai chat/);
+ await choose('Jury model', 'local:latest', /ollama.*Local Chat/);
+ await page.getByRole('button', { name: 'summary model', exact: true }).click();
+ await page.getByRole('button', { name: 'Enter a custom model ID…', exact: true }).click();
+ await page.getByLabel('Custom summary model', { exact: true }).fill('openrouter:my/custom-model');
+ fail = true;
+ await page.getByRole('button', { name: 'Refresh models', exact: true }).click();
+ await page.getByText('Some model lists could not load', { exact: true }).click();
+ await page.getByText(/openrouter: The provider rejected/).waitFor();
+ assert.equal(await page.getByLabel('Custom summary model', { exact: true }).inputValue(), 'openrouter:my/custom-model');
+ await page.getByRole('button', { name: 'Done', exact: true }).click();
+ await expect(page.locator('.composer-foot button')).toContainText('openrouter / test/beta');
+ const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('idea-garden-settings')));
+ assert.deepEqual(stored.roleModels, { seed: 'openrouter:test/beta', branch: 'anthropic:anthropic-test', cross: 'openai:openai-test', judge: 'ollama:local:latest', summary: 'openrouter:my/custom-model' });
+ assert(!JSON.stringify(stored).includes('fake-openai-key'));
+ assert(!JSON.stringify(stored).includes('fake-anthropic-key'));
+ await page.getByRole('button', { name: 'Settings', exact: true }).click();
+ await page.getByRole('tab', { name: 'Models', exact: true }).click();
+ await expect(page.getByRole('button', { name: 'seed model', exact: true })).toContainText('test/beta');
+ await page.screenshot({ path: 'screenshots/role-models.png', fullPage: true });
+ await page.setViewportSize({ width: 390, height: 844 });
+ const mobileRoles = await Promise.all([0,1].map(i => panel.locator('.role-model-grid > .role-model-row').nth(i).boundingBox()));
+ assert(Math.abs(mobileRoles[0].x - mobileRoles[1].x) < 1 && mobileRoles[1].y > mobileRoles[0].y);
+ assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+ assert.deepEqual(errors, []);
+ console.log('Role model checks passed: five role selectors only, provider discovery, saved assignments, custom IDs, refresh failure recovery, key exclusion, and mobile layout.');
+} finally { await browser.close(); }
