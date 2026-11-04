@@ -4,7 +4,7 @@ Plant a thought, explore its branches, and discover your next project. Idea Gard
 
 ![Idea Garden showing connected ideas, score-colored cards, and the jury evaluation sidebar](docs/images/idea-garden.png)
 
-Built with **SvelteKit 3, Svelte 5, Tailwind CSS 4, DaisyUI 5, and Svelte Flow**. Inspired by [fltman/idea-generator-2](https://github.com/fltman/idea-generator-2), with an original Svelte implementation.
+Built with **SvelteKit 3, Svelte 5, Tailwind CSS 4, DaisyUI 5, and Svelte Flow**
 
 ## Features at a glance
 
