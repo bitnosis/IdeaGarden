@@ -19,7 +19,7 @@ Built with **SvelteKit 3, Svelte 5, Tailwind CSS 4, DaisyUI 5, and Svelte Flow**
 
 ## Run
 
-Requires Node.js 22.12 or newer.
+Requires Node.js 22.17 or newer (Node.js 24 recommended).
 
 ```sh
 npm install
@@ -27,6 +27,12 @@ npm run dev
 ```
 
 Open http://127.0.0.1:4340. For a production build: `npm run build`, then `npm start`.
+
+## Deploy to Vercel
+
+Import this repository into Vercel with the SvelteKit framework preset and Node.js 24. The build automatically uses the official Vercel adapter when `VERCEL` is set; local builds continue to use the Node adapter. API functions allow up to 60 seconds per request.
+
+Visitors enter their own provider keys in Connections. Boards, settings, and encrypted vaults remain in each visitor's browser storage. The hosted address has separate storage from localhost; export and import a workspace backup to move boards. Local Ollama works when running the app locally; the Vercel server cannot reach Ollama on a visitor's computer. Leave server-side provider keys unset on a public deployment, since there is no sign-in or per-user access control for the API.
 
 ## Included
 
@@ -63,7 +69,7 @@ After reopening/reloading the app, a password-only unlock dialog appears when an
 
 Encryption protects the stored copy while locked; it cannot protect keys from malicious scripts or browser extensions while you type or use them. Choose a strong, unique vault password. Clearing browser storage also clears the vault. Board exports contain neither API keys nor the encrypted vault. The server uses keys only for the current request and does not write them to disk. Environment variables `OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`, and `OPENAI_API_KEY` remain supported as fallbacks; set them in the shell before starting the app.
 
-The app binds to loopback and has no user authentication. Keep it local. Hosted provider calls may incur charges; there are no autonomous paid loops.
+The local server binds to loopback. The app has no user authentication. Hosted provider calls may incur charges; there are no autonomous paid loops.
 
 ## Scope
 
