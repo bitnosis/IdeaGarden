@@ -29,6 +29,14 @@ describe('provider boundaries', () => {
     const fetcher = vi.fn().mockResolvedValue(new Response('secret key private', { status: 401 }));
     await expect(complete({ provider: 'openai', model: 'test', key: 'private', ollamaUrl: '', system: '', prompt: '' }, fetcher)).rejects.toThrow('Check your API key');
   });
+  it('allows longer build prompts and rejects truncated handoffs', async () => {
+    const input = { provider: 'openai' as const, model: 'test', key: 'private', ollamaUrl: '', system: 's', prompt: 'p', maxTokens: 6000 };
+    const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify({ choices: [{ message: { content: '# Build prompt' }, finish_reason: 'stop' }] })));
+    expect(await complete(input, fetcher)).toBe('# Build prompt');
+    expect(JSON.parse(fetcher.mock.calls[0][1].body).max_completion_tokens).toBe(6000);
+    const truncated = vi.fn().mockResolvedValue(new Response(JSON.stringify({ choices: [{ message: { content: '# Partial prompt' }, finish_reason: 'length' }] })));
+    await expect(complete(input, truncated)).rejects.toThrow('output limit');
+  });
 });
 describe('jury output', () => {
   it('parses fenced JSON and rejects prose', () => { expect(parseJson('```json\n{"ok":true}\n```')).toEqual({ ok: true }); expect(() => parseJson('here is an idea')).toThrow(); });

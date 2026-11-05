@@ -2,15 +2,17 @@ import type { Node, Edge } from '@xyflow/svelte';
 import type { CardFont } from './card-fonts';
 export const providers = ['openrouter', 'anthropic', 'openai', 'ollama'] as const;
 export type Provider = typeof providers[number];
-export const roles = ['seed', 'branch', 'cross', 'judge', 'summary'] as const;
+export const roles = ['seed', 'branch', 'cross', 'judge', 'summary', 'prompt'] as const;
 export type Role = typeof roles[number];
 export type SettingsTab = 'settings' | 'connections' | 'models';
 export type Verdict = { originality: number; feasibility: number; impact: number; reason: string; keywords: string[] };
 export type Idea = { title: string; description: string; kind: 'seed' | 'branch' | 'cross'; verdict?: Verdict; starred?: boolean; [key: string]: unknown };
 export type IdeaNode = Node<Idea, 'idea'>;
-export type Board = { id: string; title: string; goal: string; nodes: IdeaNode[]; edges: Edge[]; summary?: string; created: string };
+export type PromptNode = Node<{ title: string; markdown: string; [key: string]: unknown }, 'prompt'>;
+export type GraphNode = IdeaNode | PromptNode;
+export type Board = { id: string; title: string; goal: string; nodes: GraphNode[]; edges: Edge[]; summary?: string; created: string };
 export type Settings = { provider: Provider; keys: Record<Provider, string>; models: Record<Provider, string>; roleModels: Record<Role, string>; ollamaUrl: string; theme: string; ideaView: 'sidebar' | 'modal'; evaluationColors: boolean; autoEvaluate: boolean; cardFont: CardFont };
-export function defaultSettings(): Settings { return { provider: 'openrouter', keys: { openrouter: '', anthropic: '', openai: '', ollama: '' }, models: { openrouter: 'anthropic/claude-sonnet-4.5', anthropic: 'claude-sonnet-4-5', openai: 'gpt-4.1-mini', ollama: 'qwen3:8b' }, roleModels: { seed: '', branch: '', cross: '', judge: '', summary: '' }, ollamaUrl: 'http://127.0.0.1:11434', theme: 'abyss', ideaView: 'sidebar', evaluationColors: true, autoEvaluate: false, cardFont: 'bookish' }; }
+export function defaultSettings(): Settings { return { provider: 'openrouter', keys: { openrouter: '', anthropic: '', openai: '', ollama: '' }, models: { openrouter: 'anthropic/claude-sonnet-4.5', anthropic: 'claude-sonnet-4-5', openai: 'gpt-4.1-mini', ollama: 'qwen3:8b' }, roleModels: { seed: '', branch: '', cross: '', judge: '', summary: '', prompt: '' }, ollamaUrl: 'http://127.0.0.1:11434', theme: 'abyss', ideaView: 'sidebar', evaluationColors: true, autoEvaluate: false, cardFont: 'bookish' }; }
 export function score(v?: Verdict) { return v ? v.originality + v.feasibility + v.impact : 0; }
 export function medal(v?: Verdict) { const n = score(v); return n >= 13 ? 'gold' : n >= 11 ? 'silver' : n >= 9 ? 'bronze' : 'unrated'; }
 export function createBoard(title = 'Untitled exploration', goal = ''): Board { return { id: crypto.randomUUID(), title, goal, nodes: [], edges: [], created: new Date().toISOString() }; }

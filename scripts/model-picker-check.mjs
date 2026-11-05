@@ -22,14 +22,14 @@ try {
  await page.getByRole('button', { name: 'Settings', exact: true }).click();
  await page.getByRole('tab', { name: 'Models', exact: true }).click();
  const panel = page.getByRole('tabpanel', { name: 'Models', exact: true });
- assert.equal(await panel.locator('.model-trigger').count(), 5);
+ assert.equal(await panel.locator('.model-trigger').count(), 6);
  assert.equal(await panel.locator('.provider-grid').count(), 0);
  assert.equal(await panel.getByLabel('Default provider').count(), 0);
  const firstRole = await panel.locator('.role-model-grid > .role-model-row').nth(0).boundingBox();
  const secondRole = await panel.locator('.role-model-grid > .role-model-row').nth(1).boundingBox();
  const juryRole = await panel.locator('.jury-model-row').boundingBox();
  assert(juryRole.width > firstRole.width * 1.9 && juryRole.y < firstRole.y);
- assert.equal(await panel.locator('.role-model-grid > .role-model-row').count(), 4);
+ assert.equal(await panel.locator('.role-model-grid > .role-model-row').count(), 5);
  assert(Math.abs(firstRole.width - secondRole.width) < 1);
  assert(Math.abs(firstRole.y - secondRole.y) < 1);
  await choose('seed model', 'beta', /openrouter.*Beta Chat/);
@@ -52,7 +52,7 @@ try {
  await page.getByRole('button', { name: 'Done', exact: true }).click();
  await expect(page.locator('.composer-foot button')).toContainText('openrouter / test/beta');
  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('idea-garden-settings')));
- assert.deepEqual(stored.roleModels, { seed: 'openrouter:test/beta', branch: 'anthropic:anthropic-test', cross: 'openai:openai-test', judge: 'ollama:local:latest', summary: 'openrouter:my/custom-model' });
+ assert.deepEqual(stored.roleModels, { seed: 'openrouter:test/beta', branch: 'anthropic:anthropic-test', cross: 'openai:openai-test', judge: 'ollama:local:latest', summary: 'openrouter:my/custom-model', prompt: 'openrouter:anthropic/claude-sonnet-4.5' });
  assert(!JSON.stringify(stored).includes('fake-openai-key'));
  assert(!JSON.stringify(stored).includes('fake-anthropic-key'));
  await page.getByRole('button', { name: 'Settings', exact: true }).click();
@@ -64,5 +64,5 @@ try {
  assert(Math.abs(mobileRoles[0].x - mobileRoles[1].x) < 1 && mobileRoles[1].y > mobileRoles[0].y);
  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
  assert.deepEqual(errors, []);
- console.log('Role model checks passed: five role selectors only, provider discovery, saved assignments, custom IDs, refresh failure recovery, key exclusion, and mobile layout.');
+ console.log('Role model checks passed: six role selectors only, provider discovery, saved assignments, custom IDs, refresh failure recovery, key exclusion, and mobile layout.');
 } finally { await browser.close(); }

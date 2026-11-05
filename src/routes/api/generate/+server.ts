@@ -14,7 +14,12 @@ export const POST: RequestHandler = async ({ request, url }) => {
     if (!providers.includes(provider) || !roles.includes(role)) throw new Error('Invalid provider or action.');
     if (typeof body.goal !== 'string' || typeof body.context !== 'string' || typeof body.model !== 'string' || (body.key !== undefined && typeof body.key !== 'string')) throw new Error('Invalid request.');
     const key = body.key || env[`${provider.toUpperCase()}_API_KEY`] || '';
-    const output = await complete({ provider, key, model: body.model, ollamaUrl: body.ollamaUrl || 'http://127.0.0.1:11434', system: instructions(role), prompt: JSON.stringify({ goal: body.goal, context: body.context }) });
+    const output = await complete({ provider, key, model: body.model, ollamaUrl: body.ollamaUrl || 'http://127.0.0.1:11434', system: instructions(role), maxTokens: role === 'prompt' ? 6000 : undefined, prompt: JSON.stringify({ goal: body.goal, context: body.context }) });
+    if (role === 'prompt') {
+      let markdown = output.trim();
+      if (/^```(?:markdown|md)?[ \t]*\r?\n/i.test(markdown) && markdown.endsWith('```')) markdown = markdown.replace(/^```(?:markdown|md)?[ \t]*\r?\n/i, '').replace(/\r?\n```$/, '');
+      return json({ markdown });
+    }
     if (role === 'summary') return json({ summary: output });
     const parsed = parseJson(output);
     if (role === 'judge') return json({ verdict: validateVerdict(parsed) });

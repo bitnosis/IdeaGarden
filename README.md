@@ -11,9 +11,10 @@ Built with **SvelteKit 3, Svelte 5, Tailwind CSS 4, DaisyUI 5, and Svelte Flow**
 - **A visual space to think:** drag, connect, pan, and zoom through your ideas, with a minimap to navigate larger boards.
 - **Grow and combine ideas:** create manual or AI seeds, branch an idea into three directions, or combine two ideas into something new.
 - **Your own AI jury:** score originality, feasibility, and impact out of 15, with reasoning, keywords, score-colored outlines, and optional automatic evaluation after generation.
-- **Choose the right model for each job:** connect OpenRouter, Anthropic, OpenAI, or local Ollama and independently assign Seed, Branch, Cross, Jury, and Summary models with searchable selectors.
+- **Choose the right model for each job:** connect OpenRouter, Anthropic, OpenAI, or local Ollama and independently assign Seed, Branch, Cross, Jury, Summary, and Prompt models with searchable selectors.
 - **Make it yours:** theme previews and color swatches, Abyss as the default theme, card font choices, and idea details in a sidebar or modal.
 - **Keep ideas organized:** multiple workspaces, goals, inline title editing, search, saved ideas, and deletion confirmations for workspaces.
+- **Turn ideas into build prompts:** the sparkle button generates a detailed implementation handoff as a connected Prompt node. Expand it to read formatted Markdown, copy the source, or download a `.md` file. Choose its model independently under Settings → Models.
 - **Take your work with you:** AI board summaries, Markdown project briefs, and JSON workspace backups and imports.
 - **Local storage and encrypted credentials:** boards stay in your browser; optional password-encrypted API key storage unlocks for each page session.
 
@@ -47,7 +48,7 @@ Visitors enter their own provider keys in Connections. Boards, settings, and enc
 - Optional **Auto-evaluate** in Settings sends each newly AI-generated seed, branch, or combination to your assigned Jury model as soon as it appears. The preference is saved and starts off. Each new idea adds one evaluation request; failed evaluations leave ideas saved for manual retry.
 - Saved ideas, search, AI board summaries, Markdown project brief export.
 - OpenRouter, Anthropic, OpenAI and local Ollama; editable model IDs and per-role overrides.
-- Separate Settings, Connections, and Models tabs. Settings contains appearance and the persistent Sidebar/Modal idea-view preference; Connections contains provider credentials and the vault; Models contains just the five role assignments. A cog beside The Jury opens and focuses its model selector from either idea view.
+- Separate Settings, Connections, and Models tabs. Settings contains appearance and the persistent Sidebar/Modal idea-view preference; Connections contains provider credentials and the vault; Models contains just the six role assignments. A cog beside The Jury opens and focuses its model selector from either idea view.
 - DaisyUI theme switching, with Abyss as the default, plus a light Garden theme and the OhMyPi plum palette.
 - Five card font choices with a live preview and a saved preference; Georgia is the default.
 
@@ -55,7 +56,7 @@ No example workspaces or ideas are created automatically. AI generation starts w
 
 ## Providers and keys
 
-Open **Settings → Connections** to enter provider keys or configure Ollama's local URL. Then open **Models** to assign a provider and model to Seed, Branch, Cross, Jury, and Summary. There are no separate per-provider model settings on this tab. For Ollama, run Ollama, pull a model (for example `ollama pull qwen3:8b`), and use `http://127.0.0.1:11434`. Only loopback Ollama endpoints are accepted.
+Open **Settings → Connections** to enter provider keys or configure Ollama's local URL. Then open **Models** to assign a provider and model to Seed, Branch, Cross, Jury, Summary, and Prompt. There are no separate per-provider model settings on this tab. For Ollama, run Ollama, pull a model (for example `ollama pull qwen3:8b`), and use `http://127.0.0.1:11434`. Only loopback Ollama endpoints are accepted.
 
 Model selectors are searchable dropdowns populated from provider APIs. OpenRouter uses its public text-model catalogue (and sends your key if supplied); Anthropic and OpenAI load with your key; Ollama lists locally installed models. Lists refresh automatically after a key/address change, with a Refresh button for manual updates or server environment keys. Per-role selectors share the loaded lists. Lists stay in memory, not browser storage. If discovery fails, your selection remains intact and **Enter a custom model ID** is always available. OpenAI's list lacks chat-capability metadata, so known non-chat families are filtered, but listing does not guarantee endpoint compatibility or account access.
 
