@@ -47,6 +47,8 @@ try {
   await generateSeed();
   await expect(card('Generated 2-0')).toBeVisible();
   await card('Generated 2-0').locator('.loading-spinner').waitFor();
+  await expect(card('Generated 2-0').getByRole('status')).toHaveText('Evaluating…');
+  await expect(card('Generated 2-0').getByRole('status')).toHaveClass(/working/);
   await expect(card('Generated 2-0').getByRole('button', { name: /^Branch idea:/ })).toBeDisabled();
   unblock();
   await expect(card('Generated 2-0').locator('.node-score')).toHaveText('12 / 15');
